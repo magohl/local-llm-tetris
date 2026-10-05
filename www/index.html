@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>TETRIS · Rust + WebAssembly</title>
+    <style>
+      :root {
+        --bg: #0b0d18;
+        --fg: #d6e0fa;
+        --dim: #7c88ac;
+        --acc: #7ed6ff;
+      }
+      * { box-sizing: border-box; }
+      html, body {
+        margin: 0;
+        min-height: 100%;
+        background: radial-gradient(circle at 50% -10%, #1a1e35, #07080f 70%);
+        color: var(--fg);
+        font: 13px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      }
+      main {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        padding: 18px 14px 26px;
+      }
+      h1 {
+        margin: 0;
+        font-size: 15px;
+        font-weight: 600;
+        letter-spacing: 0.36em;
+        text-transform: uppercase;
+        color: var(--acc);
+      }
+      h1 span { color: var(--dim); letter-spacing: 0.14em; }
+      .frame { position: relative; }
+      canvas {
+        display: block;
+        height: min(76vh, 700px);
+        width: auto;
+        max-width: 96vw;
+        aspect-ratio: 600 / 688;
+        background: #090a14;
+        border: 1px solid #2a3152;
+        border-radius: 6px;
+        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.65);
+        image-rendering: pixelated;
+      }
+      #boot {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        padding: 28px;
+        text-align: center;
+        border-radius: 6px;
+        background: #090a14ee;
+        color: var(--dim);
+      }
+      #boot[hidden] { display: none; }
+      #status { color: var(--dim); font-variant-numeric: tabular-nums; }
+      .legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px 18px;
+        justify-content: center;
+        max-width: 780px;
+        color: var(--dim);
+      }
+      kbd {
+        padding: 1px 5px;
+        border: 1px solid #2a3152;
+        border-bottom-width: 2px;
+        border-radius: 4px;
+        background: #161a2c;
+        color: var(--fg);
+        font: inherit;
+      }
+      button {
+        padding: 5px 11px;
+        border: 1px solid #2a3152;
+        border-radius: 5px;
+        background: #161a2c;
+        color: var(--fg);
+        font: inherit;
+        cursor: pointer;
+      }
+      button:hover { border-color: var(--acc); color: var(--acc); }
+      button.off { opacity: 0.55; }
+      #pad { display: none; gap: 8px; flex-wrap: wrap; justify-content: center; }
+      #pad button {
+        min-width: 66px;
+        min-height: 46px;
+        font-size: 15px;
+        touch-action: none;
+        user-select: none;
+      }
+      #pad button.on { background: #1d2440; border-color: var(--acc); }
+      .row { display: flex; align-items: center; gap: 12px; }
+      @media (hover: none) and (pointer: coarse) {
+        #pad { display: flex; }
+        .legend { display: none; }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Tetris <span>· rust → wasm</span></h1>
+
+      <div class="frame">
+        <canvas id="screen" width="600" height="688" tabindex="0"></canvas>
+        <p id="boot">Loading WebAssembly module…</p>
+      </div>
+
+      <div id="status">starting</div>
+
+      <p class="legend">
+        <span><kbd>←</kbd> <kbd>→</kbd> move</span>
+        <span><kbd>↓</kbd> soft drop</span>
+        <span><kbd>space</kbd> hard drop</span>
+        <span><kbd>↑</kbd>/<kbd>x</kbd> rotate cw</span>
+        <span><kbd>z</kbd> rotate ccw</span>
+        <span><kbd>a</kbd> rotate 180</span>
+        <span><kbd>c</kbd>/<kbd>ctrl</kbd> hold</span>
+        <span><kbd>p</kbd> pause</span>
+        <span><kbd>r</kbd> restart</span>
+        <span><kbd>enter</kbd> start</span>
+        <span><kbd>m</kbd> mute</span>
+      </p>
+
+      <div id="pad">
+        <button data-act="Left" aria-label="move left">◀</button>
+        <button data-act="Right" aria-label="move right">▶</button>
+        <button data-act="SoftDrop" aria-label="soft drop">▼</button>
+        <button data-act="RotCCW" aria-label="rotate counter clockwise">↺</button>
+        <button data-act="RotCW" aria-label="rotate clockwise">↻</button>
+        <button data-act="HardDrop">DROP</button>
+        <button data-act="Hold">HOLD</button>
+        <button data-act="Start">START</button>
+      </div>
+
+      <div class="row">
+        <button id="sound">sound: on</button>
+        <span class="legend">Every pixel is drawn in Rust — the page just forwards keys and blits one buffer.</span>
+      </div>
+    </main>
+    <script src="main.js"></script>
+  </body>
+</html>
